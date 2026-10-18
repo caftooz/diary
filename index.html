@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="raciona-192.png">
+<title>Мои дневники</title>
+<style>
+:root{--bg:#EEF1F6;--surface:#fff;--ink:#121A28;--ink-2:#566277;--line:#D2D9E4;--accent:#1E58C8}
+@media (prefers-color-scheme:dark){:root{--bg:#0E131B;--surface:#151C27;--ink:#E6ECF5;--ink-2:#98A4B8;--line:#2A3547;--accent:#7BA6FF}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+main{max-width:520px;margin:0 auto;display:grid;gap:14px}
+h1{font-size:22px;margin:0 0 4px}
+p{margin:0;color:var(--ink-2)}
+a.app{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+a.app img{width:56px;height:56px;border-radius:12px;flex:none}
+a.app b{display:block;font-size:17px}
+a.app span{color:var(--ink-2);font-size:14px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+small{color:var(--ink-2);font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<h1>Мои дневники</h1>
+<p>Выберите приложение. Чтобы поставить его на главный экран, откройте его и выберите в меню браузера «Установить приложение» или «Добавить на главный экран».</p>
+<a class="app" href="raciona.html"><img src="raciona-192.png" alt=""><div><b>Дневник рациона</b><span>Меню, рецепты и дневник питания</span></div></a>
+<a class="app" href="trenirovki.html"><img src="trenirovki-192.png" alt=""><div><b>Дневник тренировок</b><span>Тренировки, программы и прогресс</span></div></a>
+<small>Данные хранятся только в вашем браузере на этом устройстве. Делайте экспорт в разделе «Настройки».</small>
+</main>
+</body>
+</html>
