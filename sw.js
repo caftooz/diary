@@ -1,4 +1,4 @@
-var CACHE = 'diary-v3';
+var CACHE = 'diary-v4';
 var ASSETS = ['./', 'index.html', 'raciona.html', 'trenirovki.html', 'raciona.webmanifest', 'trenirovki.webmanifest',
   'raciona-192.png', 'raciona-512.png', 'trenirovki-192.png', 'trenirovki-512.png'];
 self.addEventListener('install', function(e){
