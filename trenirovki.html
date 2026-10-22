@@ -1345,11 +1345,11 @@ function girlPlan(){
       {id:'b3', name:'Усиление', weeks:8, text:'Тяжелее присед и тяга, прыжки выше. Волейбол — по самочувствию.'}],
     days:[
       {k:'rest', prog:'', note:'Отдых или растяжка 15 мин'},
-      {k:'gym', prog:'G2', note:'Верх и плечи, без ног перед игрой'},
+      {k:'gym', prog:'A', note:'Верх и плечи, без ног перед игрой'},
       {k:'vb', prog:'', note:'Волейбол'},
-      {k:'gym', prog:'G1', note:'Ноги, ягодицы, лёгкий прыжок'},
+      {k:'gym', prog:'B', note:'Ноги, ягодицы, лёгкий прыжок'},
       {k:'rest', prog:'', note:'Прогулка или растяжка'},
-      {k:'gym', prog:'G3', note:'Всё тело и кор'},
+      {k:'gym', prog:'C', note:'Всё тело и кор'},
       {k:'rest', prog:'', note:'Полный отдых'}],
     rules:[
       {t:'Игра в день зала', d:'Уберите прыжковые упражнения, остальное по самочувствию.'},
@@ -1368,14 +1368,14 @@ function girlPrograms(){
   var W = WARM_GYM.slice();
   function P(id, title, ex){ return {id:id, title:title, rot:true, warm:W.slice(), items:ex.map(function(e){ return {id:e[0], sets:e[1], lo:e[2], hi:e[3]}; })}; }
   return [
-    P('G1', 'Д1 · ноги и ягодицы', [['jumpsquat',3,6,8],['squat',3,8,12],['rdl',3,8,10],['lunge',3,8,10],['bridge',3,10,12],['calf',3,12,15],['plank',3,30,40]]),
-    P('G2', 'Д2 · верх и плечи', [['pulldown',3,8,12],['dbbench',3,8,12],['ohp',3,8,10],['dbrow',3,10,12],['facepull',3,12,15],['cuff',2,12,15],['sideplank',2,20,30]]),
-    P('G3', 'Д3 · всё тело и кор', [['bulgar',3,8,10],['pushup',3,8,12],['dbrow',3,10,12],['bridge',3,10,12],['hollow',3,20,30],['superman',2,10,12]])
+    P('B', 'B · ноги и ягодицы', [['jumpsquat',3,6,8],['squat',3,8,12],['rdl',3,8,10],['lunge',3,8,10],['bridge',3,10,12],['calf',3,12,15],['plank',3,30,40]]),
+    P('A', 'A · верх и плечи', [['pulldown',3,8,12],['dbbench',3,8,12],['ohp',3,8,10],['dbrow',3,10,12],['facepull',3,12,15],['cuff',2,12,15],['sideplank',2,20,30]]),
+    P('C', 'C · всё тело и кор', [['bulgar',3,8,10],['pushup',3,8,12],['dbrow',3,10,12],['bridge',3,10,12],['hollow',3,20,30],['superman',2,10,12]])
   ];
 }
 var BUILTIN_TPL = [
   {id:'vb', name:'Волейбол и калистеника', sub:'26 недель, 3 блока, стойка, растяжка, 9 замеров'},
-  {id:'girl', name:'Зал 3 раза + волейбол', sub:'Вт/Чт/Сб зал, среда волейбол, 3 программы, 4 замера. Добавит программы Д1–Д3'},
+  {id:'girl', name:'Зал 3 раза + волейбол', sub:'Вт/Чт/Сб зал, среда волейбол, заменит программы A, B, C, 4 замера'},
   {id:'blank', name:'С нуля', sub:'3 зала в неделю, один блок, без замеров и домашних занятий'}];
 function findUserTpl(id){ for (var i = 0; i < state.templates.length; i++) if ('u:' + state.templates[i].id === id) return state.templates[i]; return null; }
 function tplName(id){
@@ -1819,7 +1819,7 @@ function viewPlanSetup(){
     h += '<div class="verdict"><p>Удалить шаблон «' + esc(tplName(ui.cask.id)) + '»? Текущий план не изменится.</p><div class="row"><button class="btn danger" data-a="cyes">Да, удалить</button><button class="btn quiet" data-a="cno">Нет</button></div></div>';
   } else if (ask) {
     var tm = tplMake(ui.cask.id), np = tm ? tm.programs.length : 0;
-    h += '<div class="verdict"><p>Заменить текущий план шаблоном «' + esc(tplName(ui.cask.id)) + '»?' + (np ? ' Программы шаблона (' + np + ') добавятся; если названия совпадут, заменятся.' : '') + '</p><div class="row"><button class="btn danger" data-a="cyes">Да, заменить</button><button class="btn quiet" data-a="cno">Нет</button></div></div>';
+    h += '<div class="verdict"><p>Заменить текущий план шаблоном «' + esc(tplName(ui.cask.id)) + '»?' + (np ? ' Программы шаблона (' + np + ') заменят одноимённые (A, B, C).' : '') + '</p><div class="row"><button class="btn danger" data-a="cyes">Да, заменить</button><button class="btn quiet" data-a="cno">Нет</button></div></div>';
   } else {
     h += '<div class="cfg">' + BUILTIN_TPL.map(function(b){
       return '<button class="cfgbtn" data-a="cask" data-v="tpl" data-id="' + b.id + '"><span><b>' + esc(b.name) + '</b><br><span class="small muted">' + esc(b.sub) + '</span></span><span aria-hidden="true">›</span></button>';
