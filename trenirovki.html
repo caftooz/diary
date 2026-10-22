@@ -242,20 +242,38 @@ var EX0 = {
  pushup:{name:'Отжимания', kind:'bw', step:1, sets:3, reps:[8,12], tip:'Тело прямое, локти под углом около 45° к корпусу. Если тяжело, отжимайтесь от скамьи или с колен.'},
  airsquat:{name:'Приседания без веса', kind:'bw', step:1, sets:3, reps:[12,15], tip:'Стопы на ширине плеч, колени по линии носков, спина прямая.'},
  gluteb:{name:'Ягодичный мостик без веса', kind:'bw', step:1, sets:3, reps:[12,15], tip:'Вверху напрягите ягодицы на секунду, поясницу не прогибайте.'},
- superman:{name:'Лодочка (разгибания спины)', kind:'bw', step:1, sets:3, reps:[10,12], tip:'Лёжа на животе, поднимайте руки и ноги плавно, без рывков, и задерживайтесь на секунду.'}
+ superman:{name:'Лодочка (разгибания спины)', kind:'bw', step:1, sets:3, reps:[10,12], tip:'Лёжа на животе, поднимайте руки и ноги плавно, без рывков, и задерживайтесь на секунду.'},
+ bbsquat:{name:'Присед со штангой', kind:'w', step:2.5, sets:4, reps:[5,5], tip:'Если техника не поставлена, начните с гоблет-приседа 4×8. Отдых 2–3 минуты.'},
+ dips:{name:'Брусья', kind:'w', step:2.5, sets:4, reps:[6,10], tip:'Вес указывайте как дополнительный (0 — без веса). Когда получается 4×12, вешайте вес от 5 кг.'},
+ pikepu:{name:'Пайк-отжимания, ноги на скамье', kind:'bw', step:1, sets:3, reps:[6,10], tip:'Основа для отжиманий в стойке на руках. Таз высоко, голова движется между руками.'},
+ bulgar:{name:'Болгарские выпады с гантелями', kind:'w', step:1, sets:3, reps:[8,8], tip:'Повторы на каждую ногу. Колено не заваливается внутрь.'},
+ calf1:{name:'Подъёмы на носок на одной ноге', kind:'bw', step:1, sets:3, reps:[12,12], tip:'Икры напрямую влияют на прыжок. Повторы на каждую ногу.'},
+ hollow:{name:'Холлоу-холд', kind:'time', step:5, sets:3, reps:[20,40], tip:'Линия тела для стойки на руках: поясница прижата к полу. Значение в секундах.'},
+ medball:{name:'Броски медбола из-за головы в пол', kind:'w', step:1, sets:4, reps:[5,5], tip:'Максимально взрывно, имитация удара. Вес указывайте как вес медбола.'},
+ pullup:{name:'Подтягивания', kind:'w', step:2.5, sets:5, reps:[5,8], tip:'Вес указывайте как дополнительный (0 — без веса). Когда получается 5×10, добавляйте вес. В тренировке C — около 60% от максимума, отдых 60–90 с.'},
+ clappush:{name:'Отжимания взрывные или с хлопком', kind:'bw', step:1, sets:3, reps:[5,5], tip:'С 3-го месяца; до этого просто быстрые отжимания.'},
+ pullover:{name:'Пуловер с гантелью лёжа', kind:'w', step:1, sets:3, reps:[10,10], tip:'Работает на замах.'},
+ facepull:{name:'Наружная ротация плеча + face pull', kind:'bw', step:1, sets:3, reps:[15,15], tip:'Суперсетом: 3×15 ротации и 3×15 face pull. Это защита ударного плеча, не пропускайте.'},
+ legraise:{name:'Подъём ног в висе', kind:'bw', step:1, sets:3, reps:[8,12], tip:'Начните с согнутых коленей.'},
+ medrot:{name:'Вращательные броски медбола в стену', kind:'w', step:1, sets:3, reps:[6,6], tip:'Повторы на каждую сторону. Сила корпуса при ударе.'},
+ runjump:{name:'Прыжки с волейбольного разбега', kind:'bw', step:1, sets:5, reps:[3,3], tip:'Полный отдых между подходами: важно качество.'},
+ pistol:{name:'Присед на одной ноге к скамье', kind:'bw', step:1, sets:3, reps:[5,5], tip:'Повторы на каждую ногу. Опускайте скамью по мере прогресса, цель — пистолет.'},
+ nordic:{name:'Скандинавские сгибания (Nordic curl)', kind:'bw', step:1, sets:3, reps:[4,6], tip:'Медленно опускайтесь, ноги держит партнёр или опора. Защищают колени.'},
+ lsit:{name:'L-sit (уголок) на брусьях', kind:'time', step:5, sets:4, reps:[10,20], tip:'Начните с согнутых ног. Значение в секундах.'}
 };
-var WARM_GYM = ['5 минут лёгкого кардио: бег, велосипед или скакалка','Круги руками и плечами, по 10 раз в каждую сторону','Приседания без веса и выпады, по 8 раз','Вращения голеностопом и коленями, по 10 раз','Первый подход каждого упражнения с лёгким весом'];
+var WARM_GYM = ['Скакалка 2–3 минуты','Суставная разминка сверху вниз','Запястья (обязательно): круги, упоры пальцами вперёд и назад','Разведения резины перед грудью, 10–15 раз','Лопаточные подтягивания 2×8, руки прямые','Махи ногами вперёд и в стороны','Затем 10–15 минут практики стойки на руках, пока вы свежие'];
 var WARM_GEN = ['5 минут лёгкого кардио или прыжков на месте','Круги руками и плечами, по 10 раз в каждую сторону','Вращения тазом, коленями и голеностопом, по 10 раз'];
+/* ex: [id, sets, lo, hi] — значения из плана на 6 месяцев */
 var PROGS0 = {
- A:{title:'A · ноги и жим', rot:true, ex:['squat','dbbench','pulldown','rdl','plank'], warm:WARM_GYM},
- B:{title:'B · выпады и плечи', rot:true, ex:['lunge','ohp','dbrow','bridge','boxjump'], warm:WARM_GYM},
- J:{title:'Прыжки и волейбол', rot:false, ex:['jumpsquat','boxjump','rope','cuff','calf','sideplank'],
-    warm:['5 минут лёгкого кардио или скакалки','Круги руками и плечами, по 10 раз в каждую сторону','Резинка на плечи: 2 подхода по 12 повторов','Лёгкие прыжки на месте, 1 минута','Вращения голеностопом и коленями, по 10 раз']}
+ A:{title:'A · ноги и жимы', rot:true, warm:WARM_GYM, ex:[['boxjump',4,3,3],['bbsquat',4,5,5],['dips',4,6,10],['rdl',3,8,8],['pikepu',3,6,10],['bulgar',3,8,8],['calf1',3,12,12],['hollow',3,20,40]]},
+ B:{title:'B · тяга и взрывная сила', rot:true, warm:WARM_GYM, ex:[['medball',4,5,5],['pullup',5,5,8],['dbrow',3,10,10],['clappush',3,5,5],['pullover',3,10,10],['facepull',3,15,15],['legraise',3,8,12],['medrot',3,6,6]]},
+ C:{title:'C · калистеника и прыжок', rot:true, warm:WARM_GYM, ex:[['runjump',5,3,3],['pistol',3,5,5],['pullup',5,5,8],['dips',4,8,12],['pushup',3,8,12],['nordic',3,4,6],['lsit',4,10,20]]}
 };
+var PLAN_FLAG = 'trainDiary.plan6m.v1';
 function defaultPrograms(){
   return Object.keys(PROGS0).map(function(k){
     var p = PROGS0[k];
-    return {id:k, title:p.title, rot:p.rot, warm:p.warm.slice(), items:p.ex.map(function(id){ var d = EX0[id]; return {id:id, sets:d.sets, lo:d.reps[0], hi:d.reps[1]}; })};
+    return {id:k, title:p.title, rot:p.rot, warm:p.warm.slice(), items:p.ex.map(function(e){ return {id:e[0], sets:e[1], lo:e[2], hi:e[3]}; })};
   });
 }
 
@@ -399,6 +417,14 @@ function loadLocal(){
         if (Array.isArray(o.programs)) state.programs = o.programs.map(cleanProgram).filter(Boolean);
         if (Array.isArray(o.customEx)) state.customEx = o.customEx.map(cleanCustomEx).filter(Boolean);
       }
+    }
+  } catch (e) {}
+  try {
+    if (!localStorage.getItem(PLAN_FLAG)) {
+      var keep = state.programs.filter(function(p){ return ['A', 'B', 'C', 'J'].indexOf(p.id) < 0; });
+      state.programs = defaultPrograms().concat(keep);
+      localStorage.setItem(PLAN_FLAG, '1');
+      saveLocal();
     }
   } catch (e) {}
   try {
