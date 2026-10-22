@@ -336,12 +336,12 @@ function defaultPrograms(){
   });
 }
 
-var state = {v:3, sessions:[], programs:defaultPrograms(), customEx:[], plan:null, maxes:[], wlog:{}, updatedAt:0};
+var state = {v:3, sessions:[], programs:defaultPrograms(), customEx:[], plan:null, maxes:[], wlog:{}, templates:[], updatedAt:0};
 var active = null;
 var ui = {tab:'home', prog:null, ql:null, qlF:{day:null, dur:90, int:3, note:''}, openEx:null, restLen:90, restCustom:false, rest:null,
           warmOpen:false, finishing:false, fin:{rpe:3, pain:[], note:'', kcal:''}, discardAsk:false, pex:null,
           importDraft:null, resetAsk:false, hasDl:false, showRaw:false, impText:'',
-          edit:null, newProg:false, np:'', ask:null, pick:null, nxOpen:false, nx:{name:'', kind:'w', step:1, tip:''}, exAsk:null, theme:'auto', pscreen:'', gtab:'train', trk:'', cask:null, mf:null, mex:'', stDone:{}, restAuto:true, dirtyView:false, acc:{}, act:'min', pday:-1};
+          edit:null, newProg:false, np:'', ask:null, pick:null, nxOpen:false, nx:{name:'', kind:'w', step:1, tip:''}, exAsk:null, theme:'auto', pscreen:'', gtab:'train', trk:'', cask:null, tname:'', mf:null, mex:'', stDone:{}, restAuto:true, dirtyView:false, acc:{}, act:'min', pday:-1};
 var remote = null, remoteMonths = {}, dirty = {}, dirtyAll = false, busy = false, flushT = null;
 var syncState = 'local', toastT = null, lastDeleted = null, wl = null;
 try {
@@ -479,6 +479,7 @@ function loadLocal(){
         if (o.plan) state.plan = cleanPlan(o.plan);
         if (Array.isArray(o.maxes)) state.maxes = o.maxes.map(cleanMax).filter(Boolean);
         if (o.wlog) state.wlog = cleanWlog(o.wlog);
+        if (Array.isArray(o.templates)) state.templates = o.templates.map(cleanTemplate).filter(Boolean);
       }
     }
     if (localStorage.getItem('trainDiary.restauto.v1') === '0') ui.restAuto = false;
@@ -541,7 +542,7 @@ async function flush(){
       await remote.months.doc(m).set({sessions: list});
       remoteMonths[m] = 1;
     }
-    await remote.profile.set({v:3, updatedAt:state.updatedAt, programs:state.programs, customEx:state.customEx, plan:state.plan, maxes:state.maxes, wlog:state.wlog});
+    await remote.profile.set({v:3, updatedAt:state.updatedAt, programs:state.programs, customEx:state.customEx, plan:state.plan, maxes:state.maxes, wlog:state.wlog, templates:state.templates});
     syncState = 'synced';
   } catch (e) {
     syncState = 'error';
@@ -582,6 +583,7 @@ async function initRemote(){
         if (pdata.plan) state.plan = cleanPlan(pdata.plan);
         if (Array.isArray(pdata.maxes)) state.maxes = pdata.maxes.map(cleanMax).filter(Boolean);
         if (pdata.wlog) state.wlog = cleanWlog(pdata.wlog);
+        if (Array.isArray(pdata.templates)) state.templates = pdata.templates.map(cleanTemplate).filter(Boolean);
         state.updatedAt = pdata.updatedAt || 0;
         saveLocal();
       } else {
@@ -790,7 +792,7 @@ function buildExport(){
       return {id:p.id, title:p.title, rot:p.rot, warm:p.warm, items:p.items.map(function(it){ return {id:it.id, name:exName(it.id), sets:it.sets, lo:it.lo, hi:it.hi}; })};
     }),
     customExercises:state.customEx,
-    plan:state.plan, maxes:state.maxes, weekLog:state.wlog,
+    plan:state.plan, maxes:state.maxes, weekLog:state.wlog, templates:state.templates,
     exercises:catalog().map(function(d){ return {id:d.id, name:d.name, kind:d.kind, step:d.step, defaultSets:d.sets, defaultReps:d.reps, tip:d.tip}; })
   };
 }
@@ -841,7 +843,8 @@ function parseImport(text){
     ui.importDraft = {list:list, skipped:raw.length - list.length, programs:progs, customEx:cx,
       plan:(!Array.isArray(o) && o.plan) ? cleanPlan(o.plan) : null,
       maxes:(!Array.isArray(o) && Array.isArray(o.maxes)) ? o.maxes.map(cleanMax).filter(Boolean) : null,
-      wlog:(!Array.isArray(o) && o.weekLog) ? cleanWlog(o.weekLog) : null};
+      wlog:(!Array.isArray(o) && o.weekLog) ? cleanWlog(o.weekLog) : null,
+      templates:(!Array.isArray(o) && Array.isArray(o.templates)) ? o.templates.map(cleanTemplate).filter(Boolean) : null};
   } catch (e) {
     ui.importDraft = null;
     toast('Не удалось прочитать JSON. Нужен файл, экспортированный из этого дневника.');
@@ -856,6 +859,7 @@ function applyImport(mode){
     if (d.plan) state.plan = d.plan;
     if (d.maxes) state.maxes = d.maxes.slice();
     if (d.wlog) state.wlog = d.wlog;
+    if (d.templates) state.templates = d.templates.slice();
   } else {
     var have = {}; state.sessions.forEach(function(s){ have[s.id] = 1; });
     d.list.forEach(function(s){ if (!have[s.id]) { state.sessions.push(s); markDirty(s.date); } });
@@ -871,6 +875,7 @@ function applyImport(mode){
       d.plan.tracks.forEach(function(t){ if (!htr[t.id]) state.plan.tracks.push(t); });
     }
     if (d.maxes) { var hm = {}; state.maxes.forEach(function(x){ hm[x.id] = 1; }); d.maxes.forEach(function(x){ if (!hm[x.id]) state.maxes.push(x); }); }
+    if (d.templates) { var ht = {}; state.templates.forEach(function(x){ ht[x.id] = 1; }); d.templates.forEach(function(x){ if (!ht[x.id]) state.templates.push(x); }); }
     if (d.wlog) Object.keys(d.wlog).forEach(function(k){ if (!state.wlog[k]) state.wlog[k] = d.wlog[k]; });
   }
   state.programs.forEach(function(p){ p.items = p.items.filter(function(it){ return !!defOf(it.id); }); });
@@ -878,7 +883,7 @@ function applyImport(mode){
   commit(); toast('Данные импортированы');
 }
 function resetAll(){
-  state.sessions = []; state.programs = defaultPrograms(); state.customEx = []; state.plan = defaultPlan(); state.maxes = []; state.wlog = {}; dirtyAll = true; ui.resetAsk = false; lastDeleted = null; ui.edit = null;
+  state.sessions = []; state.programs = defaultPrograms(); state.customEx = []; state.plan = defaultPlan(); state.maxes = []; state.wlog = {}; state.templates = []; dirtyAll = true; ui.resetAsk = false; lastDeleted = null; ui.edit = null;
   commit(); toast('Данные удалены');
 }
 
@@ -1327,6 +1332,80 @@ function blankPlan(){
     rules:[], metrics:[], tracks:[]
   };
 }
+
+function girlPlan(){
+  var st = JSON.parse(JSON.stringify(defaultPlan().tracks.filter(function(t){ return t.id === 'stretch'; })[0]));
+  st.name = 'Растяжка и мобильность'; st.goal = 2; st.goalText = '2–3'; st.dur = 15; st.ic = 'stretch';
+  st.intro = '10–15 минут в дни без зала или после тренировки. До лёгкого натяжения, не до боли. Дышите ровно.';
+  return {
+    name:'Зал 3 раза + волейбол', start:'', protein:false, volleyHints:true, deloadEvery:5, testEvery:4,
+    blocks:[
+      {id:'b1', name:'Привыкание', weeks:4, text:'Техника, лёгкие веса, запас 2–3 повтора до отказа.'},
+      {id:'b2', name:'Основа', weeks:8, text:'Добавляйте вес или повторы по двойной прогрессии. Следите за коленями и плечами.'},
+      {id:'b3', name:'Усиление', weeks:8, text:'Тяжелее присед и тяга, прыжки выше. Волейбол — по самочувствию.'}],
+    days:[
+      {k:'gym', prog:'G1', note:'Ноги, ягодицы, лёгкий прыжок'},
+      {k:'rest', prog:'', note:'Отдых или растяжка 15 мин'},
+      {k:'gym', prog:'G2', note:'Верх и плечи'},
+      {k:'rest', prog:'', note:'Прогулка или растяжка'},
+      {k:'gym', prog:'G3', note:'Всё тело и кор, без прыжков'},
+      {k:'vb', prog:'', note:'Волейбол (день можно поменять)'},
+      {k:'rest', prog:'', note:'Полный отдых'}],
+    rules:[
+      {t:'Игра в день зала', d:'Уберите прыжковые упражнения, остальное по самочувствию.'},
+      {t:'Накануне игры', d:'Тяжёлые приседы и выпады лучше сдвинуть на 2 дня раньше.'},
+      {t:'Пропустили тренировку', d:'Не добирайте. Просто продолжайте по плану.'},
+      {t:'Боль в суставе', d:'Снизьте вес или замените упражнение. Если не проходит, к врачу.'}],
+    metrics:[
+      {id:'sj', name:'Прыжок с места', unit:'см', goal:null, goalText:'', dir:1, how:'Отметка рукой на стене: высота касания минус высота вытянутой руки.'},
+      {id:'rj', name:'Прыжок с разбега', unit:'см', goal:null, goalText:'', dir:1, how:'Так же, но с волейбольного разбега.'},
+      {id:'push', name:'Отжимания', unit:'раз', goal:null, goalText:'', dir:1, how:'Максимум подряд. Выберите один вариант (от пола или с колен) и не меняйте.'},
+      {id:'plank', name:'Планка', unit:'с', goal:60, goalText:'60 с', dir:1, how:'Тело прямой линией, секундомер до потери формы.'}],
+    tracks:[st]
+  };
+}
+function girlPrograms(){
+  var W = WARM_GYM.slice();
+  function P(id, title, ex){ return {id:id, title:title, rot:true, warm:W.slice(), items:ex.map(function(e){ return {id:e[0], sets:e[1], lo:e[2], hi:e[3]}; })}; }
+  return [
+    P('G1', 'Д1 · ноги и ягодицы', [['jumpsquat',3,6,8],['squat',3,8,12],['rdl',3,8,10],['lunge',3,8,10],['bridge',3,10,12],['calf',3,12,15],['plank',3,30,40]]),
+    P('G2', 'Д2 · верх и плечи', [['pulldown',3,8,12],['dbbench',3,8,12],['ohp',3,8,10],['dbrow',3,10,12],['facepull',3,12,15],['cuff',2,12,15],['sideplank',2,20,30]]),
+    P('G3', 'Д3 · всё тело и кор', [['bulgar',3,8,10],['pushup',3,8,12],['dbrow',3,10,12],['bridge',3,10,12],['hollow',3,20,30],['superman',2,10,12]])
+  ];
+}
+var BUILTIN_TPL = [
+  {id:'vb', name:'Волейбол и калистеника', sub:'26 недель, 3 блока, стойка, растяжка, 9 замеров'},
+  {id:'girl', name:'Зал 3 раза + волейбол', sub:'Пн/Ср/Пт зал, суббота волейбол, 3 программы, 4 замера. Добавит программы Д1–Д3'},
+  {id:'blank', name:'С нуля', sub:'3 зала в неделю, один блок, без замеров и домашних занятий'}];
+function findUserTpl(id){ for (var i = 0; i < state.templates.length; i++) if ('u:' + state.templates[i].id === id) return state.templates[i]; return null; }
+function tplName(id){
+  for (var i = 0; i < BUILTIN_TPL.length; i++) if (BUILTIN_TPL[i].id === id) return BUILTIN_TPL[i].name;
+  var u = findUserTpl(id); return u ? u.name : 'шаблон';
+}
+function tplMake(id){
+  if (id === 'blank') return {plan:blankPlan(), programs:[]};
+  if (id === 'vb') return {plan:defaultPlan(), programs:[]};
+  if (id === 'girl') return {plan:girlPlan(), programs:girlPrograms()};
+  var u = findUserTpl(id); if (!u) return null;
+  var c = JSON.parse(JSON.stringify(u));
+  return {plan:cleanPlan(c.plan), programs:(c.programs || []).map(cleanProgram).filter(Boolean)};
+}
+function cleanTemplate(t){
+  if (!t || typeof t !== 'object' || !t.plan || typeof t.plan !== 'object') return null;
+  var pl = cleanPlan(t.plan); pl.start = '';
+  return {id:str(t.id || uid(), 40), name:str(t.name || 'Мой шаблон', 60), plan:pl,
+          programs:(Array.isArray(t.programs) ? t.programs : []).map(cleanProgram).filter(Boolean).slice(0, 12)};
+}
+function saveTemplate(){
+  var name = str(ui.tname, 60).trim();
+  if (!name) { toast('Введите название шаблона'); return; }
+  if (state.templates.length >= 12) { toast('Можно хранить до 12 шаблонов'); return; }
+  var pl = JSON.parse(JSON.stringify(state.plan)); pl.start = '';
+  var ids = {}, progs = [];
+  pl.days.forEach(function(d){ if (d.prog && !ids[d.prog]) { ids[d.prog] = 1; var p = findProg(d.prog); if (p) progs.push(JSON.parse(JSON.stringify(p))); } });
+  var t = cleanTemplate({id:uid(), name:name, plan:pl, programs:progs});
+  state.templates.push(t); ui.tname = ''; commit(); toast('Шаблон сохранён');
+}
 function str(v, n){ return String(v == null ? '' : v).slice(0, n); }
 function cleanPlan(p){
   if (!p || typeof p !== 'object') return defaultPlan();
@@ -1735,13 +1814,27 @@ function viewPlanSetup(){
     '<div class="row"><button class="btn" data-a="pstartThis">Начать с этой недели</button>' + (st ? '<button class="btn quiet" data-a="pstartClear">Сбросить старт</button>' : '') + '</div>' +
     '<div class="check"><input type="checkbox" id="pp" data-tog="protein"' + (state.plan.protein ? ' checked' : '') + '><label for="pp">Показывать норму белка (1,6–2 г на кг веса)</label></div></div>';
   h += '<h2 class="sec-title">Шаблоны</h2><p class="small muted" style="padding-bottom:8px">Заменяют дни, блоки, замеры и домашние занятия. История и программы остаются.</p>';
-  var ask = ui.cask && ui.cask.type === 'tpl';
-  if (ask) {
-    h += '<div class="verdict"><p>Заменить текущий план шаблоном «' + (ui.cask.id === 'blank' ? 'С нуля' : 'Волейбол и калистеника, 26 недель') + '»?</p><div class="row"><button class="btn danger" data-a="cyes">Да, заменить</button><button class="btn quiet" data-a="cno">Нет</button></div></div>';
+  var ask = ui.cask && (ui.cask.type === 'tpl' || ui.cask.type === 'tdel');
+  if (ask && ui.cask.type === 'tdel') {
+    h += '<div class="verdict"><p>Удалить шаблон «' + esc(tplName(ui.cask.id)) + '»? Текущий план не изменится.</p><div class="row"><button class="btn danger" data-a="cyes">Да, удалить</button><button class="btn quiet" data-a="cno">Нет</button></div></div>';
+  } else if (ask) {
+    var tm = tplMake(ui.cask.id), np = tm ? tm.programs.length : 0;
+    h += '<div class="verdict"><p>Заменить текущий план шаблоном «' + esc(tplName(ui.cask.id)) + '»?' + (np ? ' Программы шаблона (' + np + ') добавятся; если названия совпадут, заменятся.' : '') + '</p><div class="row"><button class="btn danger" data-a="cyes">Да, заменить</button><button class="btn quiet" data-a="cno">Нет</button></div></div>';
   } else {
-    h += '<div class="cfg"><button class="cfgbtn" data-a="cask" data-v="tpl" data-id="vb"><span><b>Волейбол и калистеника</b><br><span class="small muted">26 недель, 3 блока, стойка, растяжка, 9 замеров</span></span><span aria-hidden="true">›</span></button>' +
-      '<button class="cfgbtn" data-a="cask" data-v="tpl" data-id="blank"><span><b>С нуля</b><br><span class="small muted">3 зала в неделю, один блок, без замеров и домашних занятий</span></span><span aria-hidden="true">›</span></button></div>';
+    h += '<div class="cfg">' + BUILTIN_TPL.map(function(b){
+      return '<button class="cfgbtn" data-a="cask" data-v="tpl" data-id="' + b.id + '"><span><b>' + esc(b.name) + '</b><br><span class="small muted">' + esc(b.sub) + '</span></span><span aria-hidden="true">›</span></button>';
+    }).join('') + '</div>';
   }
+  h += '<h2 class="sec-title">Мои шаблоны</h2>';
+  if (state.templates.length) {
+    h += '<div class="cfg">' + state.templates.map(function(t){
+      return '<div class="cfgbtn" style="cursor:default"><span><b>' + esc(t.name) + '</b><br><span class="small muted">' + 'блоков: ' + t.plan.blocks.length + ', программ: ' + t.programs.length + ', замеров: ' + t.plan.metrics.length + '</span></span>' +
+        '<span style="display:grid; gap:6px; flex:none"><button class="btn" style="font-size:14px; padding:8px 12px; min-height:0" data-a="cask" data-v="tpl" data-id="u:' + esc(t.id) + '">Применить</button><button class="btn quiet" style="font-size:14px; padding:8px 12px; min-height:0" data-a="cask" data-v="tdel" data-id="u:' + esc(t.id) + '" aria-label="Удалить шаблон ' + esc(t.name) + '">Удалить</button></span></div>';
+    }).join('') + '</div>';
+  } else {
+    h += '<p class="small muted" style="padding-bottom:8px">Пока пусто. Настройте план и сохраните его как шаблон: дни, блоки, замеры, домашние занятия и используемые программы.</p>';
+  }
+  h += '<div class="form"><label for="tname">Название нового шаблона<input id="tname" data-f="tname" maxlength="60" placeholder="Например, Для друга" value="' + esc(ui.tname) + '"></label><button class="btn" data-a="tsave">Сохранить текущий план как шаблон</button></div>';
   return h;
 }
 
@@ -2127,6 +2220,7 @@ document.addEventListener('click', function(ev){
     case 'tsetm': undoSet(id); break;
     case 'cask': ui.cask = {type:v, id:id}; render(); break;
     case 'cno': ui.cask = null; render(); break;
+    case 'tsave': saveTemplate(); break;
     case 'cyes': {
       var ca = ui.cask; ui.cask = null; if (!ca) break;
       if (ca.type === 'metric') {
@@ -2138,8 +2232,16 @@ document.addEventListener('click', function(ev){
         state.plan.tracks = state.plan.tracks.filter(function(t){ return t.id !== ca.id; });
         commit(); toast('Занятие удалено');
       } else if (ca.type === 'tpl') {
-        var np2 = ca.id === 'blank' ? blankPlan() : defaultPlan();
-        np2.start = state.plan.start; state.plan = np2; commit(); toast('Шаблон применён');
+        var tm2 = tplMake(ca.id); if (!tm2) break;
+        tm2.plan.start = state.plan.start; state.plan = tm2.plan;
+        tm2.programs.forEach(function(p){
+          var ix = -1; state.programs.forEach(function(q, k){ if (q.id === p.id) ix = k; });
+          if (ix >= 0) state.programs[ix] = p; else state.programs.push(p);
+        });
+        commit(); toast('Шаблон применён');
+      } else if (ca.type === 'tdel') {
+        state.templates = state.templates.filter(function(t){ return 'u:' + t.id !== ca.id; });
+        commit(); toast('Шаблон удалён');
       }
       break;
     }
@@ -2166,6 +2268,7 @@ document.addEventListener('input', function(ev){
   else if (f === 'mval') { if (ui.mf) ui.mf.v = t.value; }
   else if (f === 'wkg') setWlog(weekStart(todayStr()), 'kg', t.value);
   else if (f === 'wnote') setWlog(weekStart(todayStr()), 'note', t.value);
+  else if (f === 'tname') ui.tname = t.value;
   else if (f === 'pname') { state.plan.name = str(t.value, 60); persist(); }
   else if (f === 'dnote') { var dn = state.plan.days[intAttr(t, 'data-i')]; if (dn) { dn.note = str(t.value, 120); persist(); } }
   else if (f === 'bname' || f === 'btext') { var bb = state.plan.blocks[intAttr(t, 'data-i')]; if (bb) { if (f === 'bname') bb.name = str(t.value, 40); else bb.text = str(t.value, 300); persist(); } }
